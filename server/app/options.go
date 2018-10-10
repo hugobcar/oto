@@ -1,7 +1,7 @@
 package app
 
 type LogOptions struct {
-	Lines     int64
+	TailLines int64
 	Follow    bool
 	PodName   string
 	Previous  bool
@@ -10,4 +10,12 @@ type LogOptions struct {
 
 type PodListOptions struct {
 	PodName string
+}
+
+type Pod struct {
+	Name     string
+	State    string
+	Age      int64
+	Restarts int32
+	Ready    bool
 }
