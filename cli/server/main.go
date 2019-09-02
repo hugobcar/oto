@@ -3,56 +3,67 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"time"
 
+	// "github.com/hugobcar/oto/pkg/protobuf/app"
 	"github.com/hugobcar/oto/server/app"
 )
 
 // Logs -
 func Logs(appName string, opts *app.LogOptions) (map[string]string, error) {
-	namespace := "default"
-	podName := "counter"
+	namespace := "monitoring"
+	podName := []string{"tiamat-67556f7c5b-rpjvh", "tiamat-67556f7c5b-rpjvh"}
 
-	logChan := make(chan map[string]string, 1)
-	go func() {
-		var logList = map[string]string{}
-		logsBuffer, err := app.PodLogs(namespace, podName, opts)
+	for _, pName := range podName {
+		// logChan := make(chan map[string]string, 1)
+		fmt.Println(pName)
 
-		sc := bufio.NewScanner(logsBuffer)
-		for sc.Scan() {
-			fmt.Println(sc.Text())
-		}
+		go getLogs(pName, namespace, opts)
 
-		if err != nil {
-			fmt.Printf("Could not retrieve the logs of Terraform job pod %s: '%v'", podName, err)
-		}
-		// logList[podName] = logsBuffer.String()
-		logChan <- logList
-	}()
-
-	select {
-	case result := <-logChan:
-		return result, nil
-	case <-time.After(2 * time.Minute):
-		return nil, fmt.Errorf("Timeout when reading the logs of all pds created by Terraform job '%s'", namespace)
+		// select {
+		// case result := <-logChan:
+		// 	return result, nil
+		// 	// case <-time.After(2 * time.Minute):
+		// 	// 	return nil, fmt.Errorf("Timeout when reading the logs of all pds created by Oto job '%s'", namespace)
+		// }
 	}
+	return nil, nil
 }
 
 func main() {
 	opts := &app.LogOptions{
 		TailLines: 10,
 		Follow:    true,
-		PodName:   "counter",
+		PodName:   "tiamat-67556f7c5b-rpjvh",
 		Previous:  false,
-		Container: "count",
+		//Container: "absolute",
 	}
 
-	logList, err := Logs("counter", opts)
+	// namespace := "default"
+	// fmt.Println(app.PodList(namespace))
+
+	logList, err := Logs("tiamat-67556f7c5b-rpjvh", opts)
 	if err != nil {
-		fmt.Printf("Could not retrieve the logs of the pods belonging to Terraform job '%s'", err.Error())
+		fmt.Printf("Could not retrieve the logs of the pods belonging to Oto job '%s'", err.Error())
 		logList = map[string]string{}
 	}
 	for podName, podLogs := range logList {
-		fmt.Printf("Logs of Pod '%s' belonging to Terraform job:\n%s", podName, podLogs)
+		fmt.Printf("Logs of Pod '%s' belonging to Oto job:\n%s", podName, podLogs)
 	}
+}
+
+func getLogs(podName, namespace string, opts *app.LogOptions) {
+	// var logList = map[string]string{}
+	logsBuffer, err := app.PodLogs(namespace, podName, opts)
+
+	sc := bufio.NewScanner(logsBuffer)
+	for sc.Scan() {
+		fmt.Println(podName)
+		fmt.Println(sc.Text())
+	}
+
+	if err != nil {
+		fmt.Printf("Could not retrieve the logs of Oto job pod %s: '%v'", podName, err)
+	}
+	// logList[podName] = logsBuffer.String()
+	//logChan <- logList
 }

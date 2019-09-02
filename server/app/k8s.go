@@ -70,8 +70,7 @@ func appPodListOptsToK8s(opts *PodListOptions) *metav1.ListOptions {
 }
 
 func buildClient() (kubernetes.Interface, error) {
-	kubeconfig := flag.String("kubeconfig", "/home/hugo/.kube/config", "absolute path to the kubeconfig file")
-	flag.Parse()
+	kubeconfig := flag.String("kubeconfig", "/home/hugo.carvalho/.kube/config", "absolute path to the kubeconfig file")
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		panic(err.Error())

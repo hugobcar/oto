@@ -19,4 +19,5 @@
 /Godeps/
 
 
+sqlite/*
 # End of https://www.gitignore.io/api/go
